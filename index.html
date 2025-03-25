@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Angka</title>
+    <style>
+        body {
+            background-color: #001f3f;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: linear-gradient(145deg, #2b2b2b, #1a1a1a);
+            padding: 20px;
+            border-radius: 15px;
+            width: 340px;
+            box-shadow: 6px 6px 12px #0f0f0f, -6px -6px 12px #3b3b3b;
+        }
+        h2 {
+            margin-top: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        #level-title, #score {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        #display {
+            background: white;
+            color: black;
+            font-size: 24px;
+            width: calc(100% - 20px);
+            padding: 10px;
+            text-align: right;
+            border-radius: 10px;
+            margin: 10px auto;
+            border: none;
+            box-shadow: inset 4px 4px 8px #aaaaaa, inset -4px -4px 8px #ffffff;
+        }
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 10px;
+        }
+        button {
+            background: linear-gradient(145deg, #f0a500, #c97b00);
+            color: white;
+            font-size: 22px;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.1s ease-in-out;
+            box-shadow: 3px 3px 6px #141414, -3px -3px 6px #3b3b3b;
+            outline: none;
+            user-select: none;
+        }
+        button:active {
+            background: #e69c00;
+            transform: scale(0.9);
+        }
+        #backspace {
+            background: #ff5733;
+            font-size: 18px;
+        }
+        #enter {
+            grid-column: span 3;
+            background: #00cc66;
+            font-size: 22px;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            background: #28a745;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+        }
+        .overlay h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .overlay button {
+            background: #ffcc00;
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p id="score">⭐ Skor: 0</p>
+        <p id="level-title">Level 1-50</p>
+        <h2>Tebak Angka</h2>
+        <p id="level">🎯 Level: 1 (Tebak angka 1-5)</p>
+        <input type="text" id="display" readonly>
+        <div class="button-container">
+            <button onclick="masukkanAngka(1)">1</button>
+            <button onclick="masukkanAngka(2)">2</button>
+            <button onclick="masukkanAngka(3)">3</button>
+            <button onclick="masukkanAngka(4)">4</button>
+            <button onclick="masukkanAngka(5)">5</button>
+            <button onclick="masukkanAngka(6)">6</button>
+            <button onclick="masukkanAngka(7)">7</button>
+            <button onclick="masukkanAngka(8)">8</button>
+            <button onclick="masukkanAngka(9)">9</button>
+            <button id="backspace" onclick="hapusSatu()">⌫</button>
+            <button onclick="masukkanAngka(0)">0</button>
+            <button id="enter" onclick="cekTebakan()">Enter</button>
+        </div>
+        <p id="ciri-ciri"></p>
+        <p id="hasil"></p>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <h1 id="overlay-text">🎉 Anda menang! <br> Angka <span id="angka-menang"></span> benar! 🎉</h1>
+        <button id="lanjut-btn" onclick="naikLevel()">Lanjut Level</button>
+    </div>
+
+    <script>
+        let level = localStorage.getItem("level") ? parseInt(localStorage.getItem("level")) : 1;
+        let maxAngka = level * 5;
+        let angkaRahasia = Math.floor(Math.random() * maxAngka) + 1;
+        let ciriRahasia = angkaRahasia % 2 === 0 ? "Angka ini genap." : "Angka ini ganjil.";
+        let score = localStorage.getItem("score") ? parseInt(localStorage.getItem("score")) : 0;
+
+        document.getElementById("score").textContent = `⭐ Skor: ${score}`;
+        document.getElementById("level").innerHTML = `🎯 Level: ${level} (Tebak angka 1-${maxAngka})`;
+        document.getElementById("ciri-ciri").innerHTML = "🔍 Petunjuk: " + ciriRahasia;
+
+        function masukkanAngka(angka) {
+            let display = document.getElementById("display");
+            if (display.value.length < 3) {
+                display.value += angka;
+            }
+        }
+
+        function hapusSatu() {
+            let display = document.getElementById("display");
+            display.value = display.value.slice(0, -1);
+        }
+
+        function cekTebakan() {
+            let tebakan = document.getElementById("display").value;
+            let hasil = document.getElementById("hasil");
+
+            if (tebakan === "" || isNaN(tebakan) || tebakan < 1 || tebakan > maxAngka) {
+                hasil.innerHTML = `Masukkan angka 1 - ${maxAngka}!`;
+                return;
+            }
+
+            tebakan = parseInt(tebakan);
+
+            if (tebakan === angkaRahasia) {
+                score += 5;
+                localStorage.setItem("score", score);
+                document.getElementById("angka-menang").textContent = angkaRahasia;
+                document.getElementById("overlay").style.display = "block";
+            } else {
+                score -= 5;
+                localStorage.setItem("score", score);
+                hasil.innerHTML = tebakan < angkaRahasia ? "📉 Angka terlalu kecil!" : "📈 Angka terlalu besar!";
+                document.getElementById("score").textContent = `⭐ Skor: ${score}`;
+            }
+
+            document.getElementById("display").value = "";
+        }
+
+        function naikLevel() {
+            level++;
+            localStorage.setItem("level", level);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
